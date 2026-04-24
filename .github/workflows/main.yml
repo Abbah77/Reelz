@@ -12,11 +12,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
+      - name: Cache Flutter SDK
+        uses: actions/cache@v3
+        with:
+          path: /tmp/flutter
+          key: flutter-stable-${{ runner.os }}
+      
       - name: Install Flutter manually
         run: |
-          cd /tmp
-          git clone https://github.com/flutter/flutter.git --depth 1 -b stable flutter
+          if [ ! -d "/tmp/flutter" ]; then
+            cd /tmp
+            git clone https://github.com/flutter/flutter.git --depth 1 -b stable flutter
+          fi
           echo "/tmp/flutter/bin" >> $GITHUB_PATH
+      
+      - name: Cache pub dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.pub-cache
+          key: pub-${{ hashFiles('pubspec.yaml') }}
       
       - name: Install dependencies
         run: flutter pub get
